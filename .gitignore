@@ -1,0 +1,12 @@
+.venv/
+
+.idea/
+
+__pycache__/
+
+saved_models/
+
+**/*.h5
+*.h5
+
+logs/

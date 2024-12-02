@@ -1,0 +1,183 @@
+
+{
+  "task": "superresolution",
+  "model": "gan",
+  "model_architecture": "ESRGAN3D",
+
+  // WandB parameters
+  "wandb_entity": "aulho",
+  "wandb_project": "Xtreme-CT",
+  "experiment_id": "ps32_4x_debug_ID000033",
+  "run_name": "ESRGAN3D_test_",
+  "note": "Enter note about experiment here",
+
+  "is_train": true,
+
+  "gpu_ids": [0],
+  "dist": false,
+  "up_factor": 4,  // upscaling factor
+
+  "path": {
+    "root": "superresolution",
+    "pretrained_netG": null,
+    "pretrained_netD": null,
+    "pretrained_netE": null,
+    "pretrained_optimizerG": null,
+    "pretrained_optimizerD": null
+  },
+
+  "datasets": {
+      "name": "HCP_1200",  // "TEST_DATASET" "2022_QIM_52_Bone" "IXI" "HCP_1200" "KIRBY21" "BRATS2023" "2022_QIM_52_Bone_Block",
+      "dataset_type": "MonaiSmartCacheDataset",   // "MonaiDataset" "MonaiSmartCacheDataset" "MonaiIterableDataset" "MonaiCacheDataset"
+
+      "n_channels": 1,  // number of input channels of data samples
+      "patch_size": 32,  // Low-resolution patch size. High-resolution has size LR*UP_FACTOR
+      "downsampling_method": "linear",  // used when degradation type is "resize"
+      "degradation_type": "resize",  // "resize" "kspace_trunc"
+      "factor_truncate": 4.0,  // Used wen degradation type is "kspace_trunc"
+      "kspace_trunc_keep_shape": false,
+
+    "train": {
+      "dataset_params": {  // Used for MonaiSmartCacheDataset
+        "patches_per_batch": 2,  // number of patches to sample for each batch
+        "replace_rate": 0.10,
+        "cache_num": 78,
+        "init_workers": 5,
+        "replace_workers": 5
+      },
+
+      "dataloader_params": {  // Used for MonaiDataset
+        "dataloader_shuffle": false,
+        "dataloader_batch_size": 1,
+        "num_load_workers": 0,
+        "persist_workers": false,
+        "pin_memory": false
+      },
+
+      "split": "train"
+    },
+
+    "test": {
+      "dataset_params": {  // Used for MonaiSmartCacheDataset
+        "patches_per_batch": 2,  // number of patches to sample for each batch
+        "replace_rate": 0.10,
+        "cache_num": 111,
+        "init_workers": 5,
+        "replace_workers": 5
+      },
+
+      "dataloader_params": {  // Used for MonaiDataset
+        "dataloader_shuffle": true,
+        "dataloader_batch_size": 1,
+        "num_load_workers": 0,
+        "persist_workers": false,
+        "pin_memory": false
+      },
+
+      "split": "test"
+    }
+  },
+  "netG": {
+    "net_type": "RRDBNet3D",
+    "description": "Residual in Residual Dense Net 3D",
+    "in_channels": 1,
+    "num_channels": 64,
+    "num_blocks": 6,
+    "upsample_method": "nearest",
+    "use_checkpoint": true,
+
+    "init_type": "kaiming_normal",
+    "init_bn_type": "uniform",      // "uniform" | "constant"
+    "init_gain": 0.1
+  },
+  "netD": {
+    "net_type": "discriminator_ESRGAN3D",
+    "description": "3D version of ESRGAN discriminator network",
+    "in_channels": 1,
+    "features": [64, 64, 128, 128, 256, 256, 512, 512],  // [64, 64, 128, 128, 256, 256, 512, 512] [32, 32, 64, 64, 128, 128, 256, 256]
+    "dense_features": [512, 1],  // [512, 1] [256, 1]
+    "base_block_type": "ConvBlock3D",
+    "kernel_size": 3,
+    "use_checkpoint": true,
+
+    "init_type": "default",
+    "init_bn_type": "uniform",      // "uniform" | "constant"
+    "init_gain": 0.2
+  },
+  "train": {
+
+    "epochs": 50,  // Maximum number of epochs
+    "mixed_precision": "FP16",
+
+    "G_loss_weights": {
+      "MSE": 0,
+      "L1": 1.0,
+      "BCE_Logistic": 0,
+      "BCE": 0,
+      "VGG": 0,
+      "VGG3D": 0.006,
+      "GRAD": 0,
+      "LAPLACE": 0,
+      "TV3D": 0,  // 0.1
+      "TEXTURE3D": 0,  // 0.5
+      "ADV": 10e-4,  // 10**-3,  // is 0.1 in mDCSRN-GAN paper, but uses WGAN-GP instead of vanilla GAN
+      "STRUCTURE_TENSOR": 0  // 10**-7
+    },
+
+    "E_decay": 0,
+
+    "G_optimizer_type": "adam",
+    "G_optimizer_lr": 5e-5, // 2e-4
+    "G_optimizer_wd": 0,
+
+    "D_update_ratio": 1,
+    "D_init_iters": 0,
+    "D_optimizer_type": "adam",
+    "D_optimizer_lr": 5e-5,
+    "D_optimizer_wd": 0,
+
+    "G_optimizer_clipgrad": 10,
+    "G_optimizer_reuse": true,
+    "G_scheduler_type": "MultiStepLR",
+    "G_scheduler_milestones": [
+      250000,
+      400000,
+      450000,
+      475000,
+      500000
+    ],
+
+    "D_optimizer_clipgrad": 100,
+    "D_optimizer_reuse": true,
+    "D_scheduler_type": "MultiStepLR",
+    "D_scheduler_milestones": [
+      250000,
+      400000,
+      450000,
+      475000,
+      500000
+    ],
+
+    "G_scheduler_gamma": 0.5,
+    "G_regularizer_orthstep": null,
+    "G_regularizer_clipstep": null,
+
+    "D_scheduler_gamma": 0.5,
+    "D_regularizer_orthstep": null,
+    "D_regularizer_clipstep": null,
+
+    "G_param_strict": true,
+    "D_param_strict": true,
+    "E_param_strict": true,
+
+    "manual_seed": 8355,
+    "checkpoint_test": 100,
+    "checkpoint_save": 1000000,
+    "checkpoint_print": 100,
+    "checkpoint_save_visuals": 100
+  },
+  "test": {
+    "performance_metrics": ["psnr", "ssim", "nrmse"],
+    "upscaling_methods": ["tio_nearest", "tio_linear"]
+  }
+}

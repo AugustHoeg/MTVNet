@@ -1,0 +1,115 @@
+
+{
+  "task": "RRDBNet3D"
+  ,
+  "model": "plain"
+  ,
+  "gpu_ids": [0]
+  ,
+  "dist": false,
+  "scale": 1
+  ,
+  "n_channels": 1
+  ,
+  "path": {
+    "root": "superresolution"
+    ,
+    "pretrained_netG": null
+    ,
+    "pretrained_netD": null
+    ,
+    "pretrained_netE": null
+    ,
+    "pretrained_optimizerG": null
+    ,
+    "pretrained_optimizerD": null
+  },
+  "datasets": {
+    "train": {
+      "name": "train_dataset"
+      ,
+      "dataset_type": "HCP"
+      ,
+      "dataroot_H": "../Vedrana_master_project/3D_datasets/datasets/HCP_1200/train" // path of H training dataset
+      ,
+      "dataroot_L": "../Vedrana_master_project/3D_datasets/datasets/HCP_1200/train" // path of L training dataset
+      ,
+      "scale": 1,
+      "crop_size": 64
+      ,
+      "split": "train",
+      "dataloader_shuffle": true,
+      "dataloader_num_workers": 16,
+      "dataloader_batch_size": 4
+    },
+    "test": {
+      "name": "val_dataset"
+      ,
+      "dataset_type": "HCP"
+      ,
+      "dataroot_H": "../Vedrana_master_project/3D_datasets/datasets/HCP_1200/test"
+      ,
+      "dataroot_L": "../Vedrana_master_project/3D_datasets/datasets/HCP_1200/test"
+      ,
+      "split": "val",
+      "dataloader_batch_size": 1,
+      "train_size": 64               // What does this mean? August
+    }
+  },
+  "netG": {
+    "net_type": "RRDBNet3D",
+    "description": "Residual-in-Residual Dense Net 3D",
+    "in_channels": 1,
+    "num_channels": 64,
+    "num_blocks": 4,  // 12
+    "upsample_method": "nearest",
+
+    "init_type": "kaiming_normal",
+    "init_bn_type": "uniform",      // "uniform" | "constant"
+    "init_gain": 0.1
+  },
+  "train": {
+
+    "mixed_precision": "FP16",
+
+    "G_lossfn_type": "l1",
+    "G_lossfn_weight": 1.0,
+    "E_decay": 0,
+
+    "G_optimizer_type": "adam",
+    "G_optimizer_lr": 2e-4,
+    "G_optimizer_wd": 0,
+
+    "D_init_iters": 0,
+    "D_optimizer_type": "adam",
+    "D_optimizer_lr": 5e-5,
+    "D_optimizer_wd": 0,
+
+    "G_optimizer_clipgrad": null,
+    "G_optimizer_reuse": true,
+    "G_scheduler_type": "MultiStepLR",
+    "G_scheduler_milestones": [
+      250000,
+      400000,
+      450000,
+      475000,
+      500000
+    ],
+
+    "G_scheduler_gamma": 0.5,
+    "G_regularizer_orthstep": null,
+    "G_regularizer_clipstep": null,
+
+    "G_param_strict": true,
+    "E_param_strict": true,
+
+    "manual_seed": 8322,
+    "checkpoint_test": 20,
+    "checkpoint_save": 1000000,
+    "checkpoint_print": 20,
+    "checkpoint_save_visuals": 20
+  },
+  "test": {
+    "performance_metrics": ["psnr", "ssim", "nrmse"]
+  }
+}
