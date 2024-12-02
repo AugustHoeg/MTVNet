@@ -6,7 +6,7 @@
 
 ## Updates
 - ✅ 2022-05-09: Release the first version of the paper at Arxiv.
-- ✅ 2022-05-20: Release the codes, models and results of HAT.
+- ✅ 2022-05-20: Release the codes, models and results of MTVNet.
 - **(To do)** Add ...
 
 ## Overview
