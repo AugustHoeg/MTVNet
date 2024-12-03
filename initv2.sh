@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple init script for Python on DTU HPC
+# Simple init script for Python on HPC
 # August Hoeg, aulho@dtu.dk, 2024
 
 # Configuration

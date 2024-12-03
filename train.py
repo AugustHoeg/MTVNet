@@ -8,7 +8,6 @@ from monai.data import SmartCacheDataset
 
 import config
 from utils.load_options import load_json, parse_arguments, save_json
-# from utils.utils import rescale255, unnormalize_image
 from utils.utils_3D_image import crop_context, crop_center
 
 
@@ -57,7 +56,6 @@ def train_model(model, opt, iterations, validation_iterations, train_loader, tes
             # -------------------------------
             # 1) load batches of HR and LR images onto GPU and feed to model
             # -------------------------------
-            # TODO: Fix hardcoding
             if opt['model_architecture'] == "MTVNet" and not opt['datasets']['enable_femur_padding']:
                 train_batch['H'] = crop_context(train_batch['H'], L=model.opt['netG']['num_levels'], level_ratio=model.opt['netG']['level_ratio'])
             model.feed_data(train_batch)
@@ -85,7 +83,6 @@ def train_model(model, opt, iterations, validation_iterations, train_loader, tes
             # -------------------------------
             # 5) record training log at the end of every epoch
             # -------------------------------
-            #if current_step % opt['train']['checkpoint_print'] == 0 and opt['rank'] == 0:
             if current_step % len(train_loader) == 0 and opt['rank'] == 0:
                 model.record_train_log(current_step, idx_train)
 
@@ -107,7 +104,6 @@ def train_model(model, opt, iterations, validation_iterations, train_loader, tes
                 model.set_eval_mode()
 
                 torch.cuda.empty_cache()
-                # train_size = config.OPT["datasets"]["test"]["train_size"]
                 idx_test = 0
                 with torch.inference_mode():
                     while idx_test < validation_iterations:
@@ -157,7 +153,6 @@ def train_model(model, opt, iterations, validation_iterations, train_loader, tes
 
                 # Update test_loader with new samples if SmartCacheDataset
                 if type(test_loader.dataset) == SmartCacheDataset:
-                    # Update cache of SmartCacheDataset class
                     test_dataset.update_cache()
 
                 # Set model(s) to train model
@@ -165,8 +160,6 @@ def train_model(model, opt, iterations, validation_iterations, train_loader, tes
 
         # Update train_loader with new samples if SmartCacheDataset
         if type(train_loader.dataset) == SmartCacheDataset:
-            # Update cache of SmartCacheDataset class
-            #print("Updating SmartCacheDataset disabled...")
             train_dataset.update_cache()
 
         # -------------------------------
@@ -186,7 +179,6 @@ def train_model(model, opt, iterations, validation_iterations, train_loader, tes
 
     # Shutdown SmartCacheDatasets
     if type(train_loader.dataset) == SmartCacheDataset:
-        # stop replacement thread of SmartCache
         train_dataset.shutdown()
         test_dataset.shutdown()
 
@@ -212,7 +204,7 @@ if __name__ == "__main__":
     print("Cuda current device", torch.cuda.current_device())
     print("Cuda device name", torch.cuda.get_device_name(0))
 
-    # Returns None if no arguments parsed, as when run in PyCharm
+    # Returns None if no arguments parsed, as when run in IDE
     args = parse_arguments()
 
     # Define experiment parameters
@@ -231,8 +223,6 @@ if __name__ == "__main__":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_ESRGAN3D.json')
         elif config.MODEL_ARCHITECTURE == "RRDBNet3D":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_RRDBNet3D.json')
-        elif config.MODEL_ARCHITECTURE == "RCAN3D":
-            opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_RCAN3D.json')
         elif config.MODEL_ARCHITECTURE == "EDDSR":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_EDDSR.json')
         elif config.MODEL_ARCHITECTURE == "MFER":

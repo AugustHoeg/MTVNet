@@ -1,32 +1,24 @@
-import os
-import math
-import torchvision.utils
 import datetime
-from tqdm import tqdm
 import glob
-import config
-import torch
-import numpy as np
-import monai
-import monai.transforms as mt
-from utils.load_options import load_json, parse_arguments, load_options_from_experiment_id
-from performance_metrics.performance_metrics import compute_performance_metrics
-from utils import utils_3D_image
-from monai.metrics.regression import SSIMMetric, MultiScaleSSIMMetric, MSEMetric, PSNRMetric, RMSEMetric
-import matplotlib.pyplot as plt
-import torchio as tio
-
-from models.model_implicit import coords_to_image
-
-from data.train_transforms import ImplicitModelTransformd, ImplicitModelTransformFastd
-
-from PIL import Image
+import os
 import time
 
-from utils.utils_image import tensor2uint, tensor2ufloat, calculate_psnr, calculate_ssim_3d, calculate_ssim_2D, calculate_nrmse, calculate_nrmse_2D, calculate_psnr_2D, calculate_ssim
-
-import scipy.stats as stats
+import matplotlib.pyplot as plt
+import monai
 import numpy as np
+import scipy.stats as stats
+import torch
+import torchio as tio
+from PIL import Image
+from tqdm import tqdm
+
+import config
+from data.train_transforms import ImplicitModelTransformFastd
+from models.model_implicit import coords_to_image
+from utils import utils_3D_image
+from utils.load_options import load_json, parse_arguments, load_options_from_experiment_id
+from utils.utils_image import calculate_ssim_2D, calculate_nrmse_2D, calculate_psnr_2D
+
 
 def get_mean_and_ci(data_sequence, confidence=0.95):
 
@@ -244,7 +236,7 @@ if __name__ == "__main__":
         context_width = 0
         patch_size_hr = opt['datasets']['patch_size_hr']
 
-    border = 4  # Same as SuperFormer
+    border = 4  # border voxels
     border_hr = border * opt['up_factor']
 
     # Create directory for test patch comparisons

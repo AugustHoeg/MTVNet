@@ -6,14 +6,9 @@ import numpy as np
 import json
 from datetime import datetime
 import random
-import logging
-import utils.utils_logger as util_logger
-import utils.utils_image as util
-import utils.utils_option as option
 from utils.utils_dist import get_dist_info, init_dist
 
 import argparse
-import utils.utils_option as option
 import monai
 
 def get_timestamp():
@@ -52,15 +47,6 @@ def parse_arguments():
                         type=str,
                         help="Specify name of HPC cluster where the experiment is run.",
                         required=False)
-
-    # parser.add_argument("--model_architecture",
-    #                     type=str,
-    #                     choices=["mDCSRN_GAN", "SuperFormer", "ESRGAN3D", "RRDBNet3D"],
-    #                     help="Specify the model architecture to use for the experiment.")
-    #
-    # parser.add_argument("--dataset", type=str,
-    #                     choices=["TEST_DATASET", "2022_QIM_52_Bone", "IXI", "HCP_1200", "KIRBY21", "BRATS2023", "2022_QIM_52_Bone_Block"],
-    #                     help="Specify the dataset to use for the experiment.")
 
     return parser.parse_args()
 
@@ -102,9 +88,6 @@ def load_json(opt_path):
         init_dist('pytorch')
     opt['rank'], opt['world_size'] = get_dist_info()
 
-    #if opt['rank'] == 0:
-    #    util.mkdirs((path for key, path in opt['path'].items() if 'pretrained' not in key))
-
     # ----------------------------------------
     # GPU devices
     # ----------------------------------------
@@ -116,6 +99,7 @@ def load_json(opt_path):
         total_gpu_mem = torch.cuda.get_device_properties(0).total_memory / 10 ** 9 if torch.cuda.is_available() else 0
         # Flag to run the script as on Home PC or HPC.
         run_type = "HOME PC" if total_gpu_mem < 10 else "HPC"
+        print(f"run type: {run_type}.")
 
         opt['total_gpu_mem'] = total_gpu_mem
         opt['run_type'] = run_type
@@ -123,8 +107,6 @@ def load_json(opt_path):
     else:
         os.environ['CUDA_VISIBLE_DEVICES'] = ""  # Run on CPU
         # print('export CUDA_VISIBLE_DEVICES=' + gpu_list)
-
-    #device = torch.device('cuda' if opt['gpu_ids'] is not None else 'cpu')
 
     # ----------------------------------------
     # default setting for distributeddataparallel
@@ -158,86 +140,3 @@ def load_json(opt_path):
 
     return opt
 
-
-### Not used anymore
-def load_and_prepare_opt(json_path='options/train_msrresnet_gan.json'):
-
-    '''
-    # ----------------------------------------
-    # Step--1 (prepare opt)
-    # ----------------------------------------
-    '''
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--opt', type=str, default=json_path, help='Path to option JSON file.')
-    parser.add_argument('--launcher', default='pytorch', help='job launcher')
-    parser.add_argument('--local_rank', type=int, default=0)
-    parser.add_argument('--dist', default=False)
-
-    opt = option.parse(parser.parse_args().opt, is_train=True)
-    opt['dist'] = parser.parse_args().dist
-
-    # ----------------------------------------
-    # distributed settings
-    # ----------------------------------------
-    if opt['dist']:
-        init_dist('pytorch')
-    opt['rank'], opt['world_size'] = get_dist_info()
-
-    if opt['rank'] == 0:
-        util.mkdirs((path for key, path in opt['path'].items() if 'pretrained' not in key))
-
-    # ----------------------------------------
-    # update opt
-    # ----------------------------------------
-    # -->-->-->-->-->-->-->-->-->-->-->-->-->-
-    init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
-    init_iter_D, init_path_D = option.find_last_checkpoint(opt['path']['models'], net_type='D')
-    init_iter_E, init_path_E = option.find_last_checkpoint(opt['path']['models'], net_type='E')
-    opt['path']['pretrained_netG'] = init_path_G
-    opt['path']['pretrained_netD'] = init_path_D
-    opt['path']['pretrained_netE'] = init_path_E
-    init_iter_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
-    init_iter_optimizerD, init_path_optimizerD = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerD')
-    opt['path']['pretrained_optimizerG'] = init_path_optimizerG
-    opt['path']['pretrained_optimizerD'] = init_path_optimizerD
-    current_step = max(init_iter_G, init_iter_D, init_iter_E, init_iter_optimizerG, init_iter_optimizerD)
-
-    # opt['path']['pretrained_netG'] = ''
-    # current_step = 0
-    border = opt['scale']
-    # --<--<--<--<--<--<--<--<--<--<--<--<--<-
-
-    # ----------------------------------------
-    # save opt to  a '../option.json' file
-    # ----------------------------------------
-    if opt['rank'] == 0:
-        option.save(opt)
-
-    # ----------------------------------------
-    # return None for missing key
-    # ----------------------------------------
-    opt = option.dict_to_nonedict(opt)
-
-    # ----------------------------------------
-    # configure logger
-    # ----------------------------------------
-    if opt['rank'] == 0:
-        logger_name = 'train'
-        util_logger.logger_info(logger_name, os.path.join(opt['path']['log'], logger_name+'.log'))
-        logger = logging.getLogger(logger_name)
-        logger.info(option.dict2str(opt))
-
-    # ----------------------------------------
-    # seed
-    # ----------------------------------------
-    seed = opt['train']['manual_seed']
-    if seed is None:
-        seed = random.randint(1, 10000)
-    print('Random seed: {}'.format(seed))
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-
-    return opt
