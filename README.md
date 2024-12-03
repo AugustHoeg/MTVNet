@@ -10,6 +10,60 @@
 - **(To do)** Add ...
 
 ## Overview
+
+## Environment
+- [PyTorch >= 2.5.1](https://pytorch.org/)
+- [Monai >= ]
+### Installation
+1. Clone the repository.
+2. Install requirements
+```sh
+pip install -r requirements.txt
+```
+
+## Training
+```python
+python -u train.py --options_file train_MTVNet.json 
+```
+
+## Testing
+```python
+python -u test.py --options_file train_MTVNet.json 
+```
+
+## LAM 3D
+1. Navigate to /LAM_3d
+2. Run the analysis
+```sh
+   cd LAM_3d
+   ./run_LAM_tests.sh
+```
+> Only FACTS-Synth at scale $\times 4$ is supported. 
+
+## Contributions
+Contributions are welcome, just create an [issue](https://github.com/AugustHoeg/MTVNet/issues) or a [PR](https://github.com/AugustHoeg/MTVNet/pulls).
+
+## Reference
+If you use this any of this for academic work, please consider citing our work.
+
+> Høeg, August Leander, et al. MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions, 
+[ [paper](https://doi.org/) ]
+
+``` bibtex
+@article{Hoeg2024MTVNet,
+  author = {Høeg, August Leander and Bardenfleth, Sophia W. and Kjær, Hans Martin and Dyrby, Tim B. and Dahl, Vedrana and Dahl, Anders Bjorholm},
+  title = {MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions},
+  language = {eng},
+  format = {article},
+  year = {2024},
+  doi = {}
+}
+```
+
+## More information
+
+## License
+Apache 2.0 License (see LICENSE file).
 <!---
 <img src="https://raw.githubusercontent.com/chxy95/HAT/master/figures/Performance_comparison.png" width="600"/>
 
