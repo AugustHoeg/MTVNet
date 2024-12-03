@@ -65,17 +65,17 @@ echo "About to run scripts"
 
 #python -u train.py --options_file train_ArSSR_2022_QIM_52_Bone_4x.json --cluster "DTU_HPC"
 
-#python -u test_simpleV3.py --options_file train_ArSSR_2022_QIM_52_Bone_4x.json --cluster "DTU_HPC"
+#python -u test.py --options_file train_ArSSR_2022_QIM_52_Bone_4x.json --cluster "DTU_HPC"
 
 
 #python -u train.py --options_file train_ArSSR_2022_QIM_52_Bone_3x.json --cluster "DTU_HPC"
 
-#python -u test_simpleV3.py --options_file train_ArSSR_2022_QIM_52_Bone_3x.json --cluster "DTU_HPC"
+#python -u test.py --options_file train_ArSSR_2022_QIM_52_Bone_3x.json --cluster "DTU_HPC"
 
 
 #python -u train.py --options_file train_ArSSR_Synthetic_2022_QIM_52_Bone_4x.json --cluster "DTU_HPC"
 
-#python -u test_simpleV3.py --options_file train_ArSSR_Synthetic_2022_QIM_52_Bone_4x.json --cluster "DTU_HPC"
+#python -u test.py --options_file train_ArSSR_Synthetic_2022_QIM_52_Bone_4x.json --cluster "DTU_HPC"
 
 
 python -u train.py --options_file train_ArSSR_Synthetic_2022_QIM_52_Bone_3x.json --cluster "DTU_HPC"

@@ -28,49 +28,13 @@ def get_mean_and_ci(data_sequence, confidence=0.95):
     h = se * stats.t.ppf((1 + confidence) / 2., n - 1)
     return mean, h
 
-def get_idx(patch_size, img_shape, h, w, d, border, context_width):
-    h_start = h * patch_size - 2 * h * (border + context_width)
-    w_start = w * patch_size - 2 * w * (border + context_width)
-    d_start = d * patch_size - 2 * d * (border + context_width)
-    start = [h_start, w_start, d_start]
-
-    h_stop = h * patch_size - 2 * h * (border + context_width) + patch_size
-    w_stop = w * patch_size - 2 * w * (border + context_width) + patch_size
-    d_stop = d * patch_size - 2 * d * (border + context_width) + patch_size
-    stop = [h_stop, w_stop, d_stop]
-    for i in range(3):
-        if stop[i] > img_shape[i+2]:
-            start[i] = (img_shape[i+2] - patch_size)
-            stop[i] = img_shape[i+2]
-
-    return start, stop
-
-def get_idx_hr(patch_size, img_shape, h, w, d, border):
-    h_start = (h * patch_size - 2 * h * border) + border
-    w_start = (w * patch_size - 2 * w * border) + border
-    d_start = (d * patch_size - 2 * d * border) + border
-    start = [h_start, w_start, d_start]
-
-    h_stop = (h * patch_size - 2 * h * border + patch_size) - border
-    w_stop = (w * patch_size - 2 * w * border + patch_size) - border
-    d_stop = (d * patch_size - 2 * d * border + patch_size) - border
-    stop = [h_stop, w_stop, d_stop]
-    for i in range(3):
-        if stop[i] > img_shape[i+2]:
-            start[i] = (img_shape[i+2] - patch_size) + border
-            stop[i] = img_shape[i+2] - border
-
-    return start, stop
-
-
 def trim_background_slices(img_L, img_E, img_H, dataset_name, threshhold_percentage=0.20):
-    # Experimental method for removing slices that only contain background
     # Set a simple threshold for the background. Any voxel larger will be considered brain/bone
-    # A slice is discarded if it contains less can 20% foreground voxels.
+    # A slice is discarded if it contains less can X% foreground voxels.
     if dataset_name == "KIRBY21":
         lr_foreground_threshold = 0.02  # Kirby21 is T2w and therefore we need lower threshold
     elif dataset_name == "2022_QIM_52_Bone" or dataset_name == "Synthetic_2022_QIM_52_Bone":
-        lr_foreground_threshold = 0.02  # Bone datasets are very sparse, they should have lower threshold
+        lr_foreground_threshold = 0.02
     elif dataset_name == "IXI":
         # Rotate such that scans are z-sliced, then flip to match orientation of other datasets
         img_L = torch.flip(img_L.permute(0, 3, 1, 2), dims=[1, 2, 3])
@@ -78,7 +42,7 @@ def trim_background_slices(img_L, img_E, img_H, dataset_name, threshhold_percent
         img_H = torch.flip(img_H.permute(0, 3, 1, 2), dims=[1, 2, 3])
         lr_foreground_threshold = 0.05
     elif dataset_name == "BRATS2023":
-        lr_foreground_threshold = 0.05  # The rest of the datasets use this:
+        lr_foreground_threshold = 0.05
     else:
         lr_foreground_threshold = 0.05  # The rest of the datasets use this:
 
@@ -116,15 +80,13 @@ def apply_implicit_transform(batch, transform, out_dtype=torch.float32):
 
 if __name__ == "__main__":
 
-    # Returns None if no arguments parsed, as when run in PyCharm
+    # Returns None if no arguments parsed, as when run in IDE
     args = parse_arguments()
 
     # Define experiment parameters
     options_file = args.options_file
     experiment_id = args.experiment_id
     print("options_file", options_file)
-
-    #experiment_id = "debug_home_ID000001"
 
     if experiment_id is not None:
         # Load saved options file saved based on specified experiment id
@@ -158,13 +120,10 @@ if __name__ == "__main__":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_mDCSRN.json')
         elif config.MODEL_ARCHITECTURE == "SuperFormer":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_SuperFormer.json')
-            # opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_superformer_old.json')
         elif config.MODEL_ARCHITECTURE == "ESRGAN3D":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_ESRGAN3D.json')
         elif config.MODEL_ARCHITECTURE == "RRDBNet3D":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_RRDBNet3D.json')
-        elif config.MODEL_ARCHITECTURE == "RCAN3D":
-            opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_RCAN3D.json')
         elif config.MODEL_ARCHITECTURE == "EDDSR":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_EDDSR.json')
         elif config.MODEL_ARCHITECTURE == "MFER":
@@ -200,7 +159,6 @@ if __name__ == "__main__":
     print("Cuda current device", torch.cuda.current_device())
     print("Cuda device name", torch.cuda.get_device_name(0))
 
-    # Define universal SR model using the KAIR define_Model framework
     from models.select_model import define_Model
     model = define_Model(opt)
     model.init_test(experiment_id)
@@ -209,25 +167,22 @@ if __name__ == "__main__":
     opt['datasets']["dataset_type"] = "MonaiDataset"
 
     from data.select_dataset import define_Dataset
-    train_dataset, test_dataset, baseline_dataset = define_Dataset(opt)  # optional to have baseline dataloader as final output
+    train_dataset, test_dataset, baseline_dataset = define_Dataset(opt)
 
     dataloader_params_train = opt['datasets']['train']['dataloader_params']
     dataloader_params_test = opt['datasets']['test']['dataloader_params']
 
     baseline_loader = monai.data.DataLoader(baseline_dataset,
-                                            batch_size=1, #dataloader_params_test['dataloader_batch_size'],
-                                            shuffle=False, #dataloader_params_test['dataloader_shuffle'],
+                                            batch_size=1,
+                                            shuffle=False,
                                             num_workers=dataloader_params_test['num_load_workers'],
                                             persistent_workers=dataloader_params_test['persist_workers'],
                                             pin_memory=dataloader_params_test['pin_memory'])
 
     psnr_list, ssim_list, nrmse_list = [], [], []
 
-    # Testing loop inspired by SuperFormer: https://github.com/BCV-Uniandes/SuperFormer/blob/main/main_test_3D.py
-
     if opt['model_architecture'] == "MTVNet":
         patch_size = opt['datasets']['patch_size']
-        #center_size = opt['datasets']['patch_size'] // 2**(opt['netG']['num_levels'] - 1)
         center_size = opt['netG']['context_sizes'][-1]  # New 
         context_width = (patch_size - center_size) // 2
         patch_size_hr = center_size * opt['up_factor']
@@ -247,12 +202,11 @@ if __name__ == "__main__":
     if not os.path.exists(image_dir + "full_slice_comparisons/"):
         os.makedirs(image_dir + "full_slice_comparisons/")
 
-    #implicit_model_transform = ImplicitModelTransformd(opt['up_factor'], mode="test")
     implicit_model_transform = ImplicitModelTransformFastd(opt['up_factor'], mode="test")
 
     print("RUNNING TEST SIMPLE")
 
-    # These are for computing mean and std across each sample
+    # For computing mean and std across each sample
     psnr_slice_list = []
     ssim_slice_list = []
     nrmse_slice_list = []
@@ -289,7 +243,6 @@ if __name__ == "__main__":
                     sr_patch = coords_to_image(model.E, patch_size=opt['datasets']['patch_size_hr'])
                 else:
                     model.feed_data({'H': patches_batch_hr['H'], 'L': patches_batch_lr['L']}, add_key='data')
-                    #sr_patch = torch.zeros_like(patches_batch_hr['H']['data']) # For debugging
                     model.netG_forward()
                     sr_patch = model.E
                 locations_hr = patches_batch_hr['location']
@@ -316,8 +269,6 @@ if __name__ == "__main__":
             img_L = img_L[:, :, border:-border, border:-border, border:-border]
             img_E = img_E[:, :, border_hr:-border_hr, border_hr:-border_hr, border_hr:-border_hr]
             img_H = img_H[:, :, border_hr:-border_hr, border_hr:-border_hr, border_hr:-border_hr]
-        #if opt['datasets']['name'] == "2022_QIM_52_Bone" or opt['datasets']['name'] == "Synthetic_2022_QIM_52_Bone":
-        #    mask = baseline_batch['mask'][:, :, border_hr:-border_hr, border_hr:-border_hr, border_hr:-border_hr]
 
         # Plot slice for visual inspection
         if opt['run_type'] == "HOME PC":
@@ -339,7 +290,6 @@ if __name__ == "__main__":
             plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
             plt.show()
 
-        # Compute performance metrics
         img_L, img_E, img_H = img_L[0], img_E[0], img_H[0]  # Assumes batch size is 1
         img_L, img_E, img_H = trim_background_slices(img_L, img_E, img_H, opt['datasets']['name'], 0.20)
 

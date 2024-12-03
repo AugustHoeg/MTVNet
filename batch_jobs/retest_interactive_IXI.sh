@@ -14,5 +14,5 @@ python -u test_simpleV3.py --experiment_id "MFER_ps32_4x_ID000271_L1_100K" --clu
 python -u test_simpleV3.py --experiment_id "EDDSR_ps32_4x_ID000261_L1_100K" --cluster "DTU_HPC"
 
 
-#python -u test_simpleV3.py --experiment_id "" --cluster "DTU_HPC"
+#python -u test.py --experiment_id "" --cluster "DTU_HPC"
 

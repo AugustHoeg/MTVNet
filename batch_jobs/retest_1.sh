@@ -75,10 +75,10 @@ python -u test_simpleV3.py --experiment_id "SuperFormer_ps32_4x_ID006535_L1_100K
 python -u test_simpleV3.py --experiment_id "AugustNet_ps32_4x_ID007588_L1_100K" --cluster "DTU_HPC"
 
 
-#python -u test_simpleV3.py --experiment_id "" --cluster "DTU_HPC"
+#python -u test.py --experiment_id "" --cluster "DTU_HPC"
 
 
-#python -u test_simpleV3.py --experiment_id "" --cluster "DTU_HPC"
+#python -u test.py --experiment_id "" --cluster "DTU_HPC"
 
 
 echo "Finished scripts"

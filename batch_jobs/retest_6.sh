@@ -64,7 +64,7 @@ source "${VENV_DIR}/${VENV_NAME}/bin/activate"
 echo "About to run scripts"
 
 
-#python -u test_simpleV3.py --experiment_id "ArSSR_ps32_2x_ID008002_L1_100K" --cluster "DTU_HPC"
+#python -u test.py --experiment_id "ArSSR_ps32_2x_ID008002_L1_100K" --cluster "DTU_HPC"
 
 
 python -u test_simpleV3.py --experiment_id "EDDSR_ps32_2x_ID002003_L1_100K" --cluster "DTU_HPC"
@@ -78,7 +78,7 @@ python -u test_simpleV3.py --experiment_id "mDCSRN_ps32_2x_ID004002_L1_100K" --c
 python -u test_simpleV3.py --experiment_id "RRDBNet3D_ps32_2x_ID005052_L1_100K" --cluster "DTU_HPC"
 
 
-#python -u test_simpleV3.py --experiment_id "SuperFormer_ps32_2x_ID006020_L1_100K" --cluster "DTU_HPC"
+#python -u test.py --experiment_id "SuperFormer_ps32_2x_ID006020_L1_100K" --cluster "DTU_HPC"
 
 
 python -u test_simpleV3.py --experiment_id "AugustNet_ps32_2x_ID007052_L1_100K" --cluster "DTU_HPC"
