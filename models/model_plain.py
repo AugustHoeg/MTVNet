@@ -7,23 +7,16 @@ import torch.nn as nn
 import wandb
 from torch.optim import lr_scheduler
 from torch.optim import Adam
-from torchvision.utils import make_grid
 
 import config
 from models.select_network import define_G
 from models.model_base import ModelBase
 
-from loss_functions.loss_functions import VGGLoss, VGGLoss3D, GradientLoss3D, TotalVariationLoss3D, TextureLoss3D, \
-    StructureLoss3D, LaplacianLoss3D, compute_generator_loss
+from loss_functions.loss_functions import compute_generator_loss
 
 from performance_metrics.performance_metrics import PSNR_3D, SSIM_3D, NRMSE_3D, compute_performance_metrics
 
-from utils import utils_image
 from utils import utils_3D_image
-
-#from ..loss_functions import loss_functions
-#from loss import GANLoss, PerceptualLoss
-#from loss_ssim import SSIMLoss
 import matplotlib.pyplot as plt
 
 class ModelPlain(ModelBase):
@@ -71,7 +64,6 @@ class ModelPlain(ModelBase):
         self.define_metrics()  # define metrics
         self.enable_automatic_mixed_precision()  # enable automatic mixed precision
         self.define_visual_eval()
-        # self.log_dict = OrderedDict()          # log
 
     # ----------------------------------------
     # initialize training
@@ -87,26 +79,16 @@ class ModelPlain(ModelBase):
         self.load_optimizers()                  # load optimizer
         self.define_scheduler()                 # define scheduler
         self.define_visual_eval()
-        #self.log_dict = OrderedDict()          # log
 
     # ----------------------------------------
     # load pre-trained G and D model
     # ----------------------------------------
     def load(self, experiment_id=None):
-        # proposal for loading:
-        # Change path to "logs"
         # navigate to appropriate directory using dataset -> wandb -> run ID -> latest
 
         load_path_G = self.opt['path']['pretrained_netG_experiment_id'] if experiment_id is None else experiment_id
-        # load_path_E = True if force_load else self.opt['path']['pretrained_netE']
-
-        # dataset = self.opt['datasets']['name']
-        # ID = "*" + self.opt['experiment_id']
-        # # Select latest modified log directory
-        # wandb_path = os.path.join("logs", dataset, "wandb", ID, "files", "saved_models")
 
         if load_path_G is not None:
-            #experiment_id_G = self.opt['path']['pretrained_netG_experiment_id']
             experiment_id_G = load_path_G
             opt_files = glob.glob(os.path.join(
                 config.ROOT_DIR + "/logs/" + "/*/" "/wandb/" + "*" + experiment_id_G + "/files/saved_models/*G.h5"))
@@ -154,17 +136,8 @@ class ModelPlain(ModelBase):
         if self.opt_train['G_optimizer_reuse']:
             self.save_optimizer(self.opt_save_dir, self.G_optimizer, 'optimizerG', iter_label)
 
-
-        #print("SAVING NETWORK PARAMETERS")
-        #torch.save(generator.state_dict(), os.path.join(wandb.run.dir, "saved_models", "generator.h5"))
         filename_G = '{}_{}.h5'.format(iter_label, 'G')
         filename_optG = '{}_{}.h5'.format(iter_label, 'optimizerG')
-
-        # Add saved models/optimizers to wandb artifacts
-        print("TODO save model artifacts using wandb")
-        #self.model_artifact_G.add_file(os.path.join(self.model_save_dir, filename_G))
-        #self.model_artifact_G.add_file(os.path.join(self.opt_save_dir, filename_optG))
-        #wandb.run.log_artifact(self.model_artifact_G)
 
 
     def define_wandb_run(self):
@@ -203,11 +176,6 @@ class ModelPlain(ModelBase):
         # https://docs.wandb.ai/guides/artifacts/construct-an-artifact
         self.wandb_config = wandb.config
 
-        self.model_artifact_G = wandb.Artifact(
-            "Generator", type=self.opt['netG']['net_type'],
-            description=self.opt['netG']['description'],
-            metadata=self.opt['netG'])
-
 
     # ----------------------------------------
     # define loss
@@ -219,13 +187,6 @@ class ModelPlain(ModelBase):
             "L1": nn.L1Loss(),
             "BCE_Logistic": nn.BCEWithLogitsLoss(),
             "BCE": nn.BCELoss(),
-            "VGG": VGGLoss(layer_idx=36, device=self.device),
-            "VGG3D": VGGLoss3D(num_parts=2*self.opt['up_factor'], layer_idx=35, loss_func=nn.MSELoss(), device=self.device),
-            "GRAD": GradientLoss3D(kernel='diff', order=1, loss_func=nn.L1Loss(), sigma=None),  # sigma = 0.8,
-            "LAPLACE": LaplacianLoss3D(sigma=1.0, padding='valid', loss_func=nn.L1Loss()),
-            "TV3D": TotalVariationLoss3D(mode="L2"),  # or mode = "sum_of_squares", "L2",
-            "TEXTURE3D": TextureLoss3D(layer_idx=35),
-            "STRUCTURE_TENSOR": StructureLoss3D(sigma=0.5, rho=0.5)
         }
 
         self.loss_val_dict = self.opt_train['G_loss_weights']
@@ -234,70 +195,11 @@ class ModelPlain(ModelBase):
         self.G_train_loss = 0.0
         self.G_valid_loss = 0.0
 
-        # ------------------------------------
-        # 1) G_loss
-        # ------------------------------------
-
-
-
-        # if self.opt_train['G_lossfn_weight'] > 0:
-        #     G_lossfn_type = self.opt_train['G_lossfn_type']
-        #     if G_lossfn_type == 'l1':
-        #         self.G_lossfn = nn.L1Loss().to(self.device)
-        #     elif G_lossfn_type == 'l2':
-        #         self.G_lossfn = nn.MSELoss().to(self.device)
-        #     elif G_lossfn_type == 'l2sum':
-        #         self.G_lossfn = nn.MSELoss(reduction='sum').to(self.device)
-        #     else:
-        #         raise NotImplementedError('Loss type [{:s}] is not found.'.format(G_lossfn_type))
-        #     self.G_lossfn_weight = self.opt_train['G_lossfn_weight']
-        # else:
-        #     print('Do not use pixel loss.')
-        #     self.G_lossfn = None
-
-        # ------------------------------------
-        # 2) F_loss
-        # ------------------------------------
-        #if self.opt_train['F_lossfn_weight'] > 0:
-        #    F_feature_layer = self.opt_train['F_feature_layer']
-        #    F_weights = self.opt_train['F_weights']
-        #    F_lossfn_type = self.opt_train['F_lossfn_type']
-        #    F_use_input_norm = self.opt_train['F_use_input_norm']
-        #    F_use_range_norm = self.opt_train['F_use_range_norm']
-        #    if self.opt['dist']:
-        #        self.F_lossfn = PerceptualLoss(feature_layer=F_feature_layer, weights=F_weights, lossfn_type=F_lossfn_type, use_input_norm=F_use_input_norm, use_range_norm=F_use_range_norm).to(self.device)
-        #    else:
-        #        self.F_lossfn = PerceptualLoss(feature_layer=F_feature_layer, weights=F_weights, lossfn_type=F_lossfn_type, use_input_norm=F_use_input_norm, use_range_norm=F_use_range_norm)
-        #        self.F_lossfn.vgg = self.model_to_device(self.F_lossfn.vgg)
-        #        self.F_lossfn.lossfn = self.F_lossfn.lossfn.to(self.device)
-        #    self.F_lossfn_weight = self.opt_train['F_lossfn_weight']
-        #else:
-        #    print('Do not use feature loss.')
-        #    self.F_lossfn = None
-
-        # ------------------------------------
-        # 3) D_loss
-        # ------------------------------------
-
-        #self.D_lossfn = GANLoss(self.opt_train['gan_type'], 1.0, 0.0).to(self.device)
-        #self.D_lossfn_weight = self.opt_train['D_lossfn_weight']
-
     # ----------------------------------------
     # define metrics
     # ----------------------------------------
     def define_metrics(self):
-        #self.metric_fn_dict = {
-        #    "psnr": performance_metrics.PSNR_3D(),
-        #    "ssim": performance_metrics.SSIM_3D(),
-        #    "nrmse": performance_metrics.NRMSE_3D(),
-        #}
 
-        # Define losses for G and D
-        #self.psnr = 0.0
-        #self.ssim = 0.0
-        #self.nrmse = 0.0
-
-        # TODO add functionality for 2D metrics (Here 3D images are assumed)
         self.metric_fn_dict = {}
         self.metric_val_dict = {}
         if "psnr" in self.opt_test['performance_metrics']:
@@ -372,7 +274,6 @@ class ModelPlain(ModelBase):
             unnorm_image = False
             div_max_image = False
         if self.opt['model_architecture'] == 'MTVNet':
-            # TODO: Fix this for level_ratios other than 2
             patch_size_hr = int(self.opt['netG']['context_sizes'][-1]*self.opt['up_factor'])
         else:
             patch_size_hr = self.opt['datasets']['patch_size_hr']
@@ -429,7 +330,6 @@ class ModelPlain(ModelBase):
         with torch.cuda.amp.autocast(dtype=self.mixed_precision):
             # Forward G
             self.netG_forward()
-            #with torch.cuda.amp.autocast(dtype=torch.float64):
             self.gen_loss = compute_generator_loss(self.H, self.E, self.loss_fn_dict, self.loss_val_dict,None, self.device)
             self.gen_loss = self.gen_loss / self.num_accum_steps_G  # Scale loss by number of accumulation steps
 
@@ -458,47 +358,6 @@ class ModelPlain(ModelBase):
 
         self.G_accum_count += 1
 
-
-        # self.G_optimizer.zero_grad()
-        #
-        # # Forward G on fake image E with/without AMP
-        # self.netG_forward()
-        #
-        # # Compute generator loss with/without AMP
-        # if self.mixed_precision is not None:
-        #     with torch.cuda.amp.autocast(dtype=self.mixed_precision):
-        #         self.gen_loss = compute_generator_loss(self.H, self.E, self.loss_fn_dict, self.loss_val_dict, None, self.device)
-        #         self.gen_scaler.scale(self.gen_loss).backward()
-        # else:
-        #     self.gen_loss = compute_generator_loss(self.H, self.E, self.loss_fn_dict, self.loss_val_dict, None, self.device)
-        #     self.gen_loss.backward()  # Standard precision backward
-        #
-        # # Add generator training loss to total loss
-        # self.G_train_loss += self.gen_loss
-        #
-        # # ------------------------------------
-        # # clip_grad
-        # # ------------------------------------
-        # G_optimizer_clipgrad = self.opt_train['G_optimizer_clipgrad'] if self.opt_train['G_optimizer_clipgrad'] else 0
-        # if G_optimizer_clipgrad > 0:
-        #     # Unscales the gradients of optimizer's assigned params in-place if AMP is enabled
-        #     if self.mixed_precision is not None:
-        #         self.gen_scaler.unscale_(self.G_optimizer)
-        #     # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
-        #     print("G gradient norm:", torch.nn.utils.clip_grad_norm_(self.netG.parameters(), max_norm=G_optimizer_clipgrad, norm_type=2).item())
-        #
-        # # ------------------------------------
-        # # update parameters for G
-        # # ------------------------------------
-        # if self.mixed_precision is not None:
-        #     self.gen_scaler.step(self.G_optimizer)
-        #     self.gen_scaler.update()
-        # else:
-        #     self.G_optimizer.step()
-        #
-        # # ------------------------------------
-        # # TODO Regularizer as in SuperFormer
-        # # ------------------------------------
 
     def optimize_parameters(self, current_step, update=False):
 
@@ -530,10 +389,6 @@ class ModelPlain(ModelBase):
             self.G_accum_count = 0
 
         self.G_accum_count += 1
-        # # ------------------------------------
-        # # TODO Regularizer as in SuperFormer
-        # # ------------------------------------
-
 
     def record_train_log(self, current_step, idx_train):
         # ------------------------------------
@@ -547,15 +402,6 @@ class ModelPlain(ModelBase):
         # Reset training losses
         self.G_train_loss = 0.0
 
-
-        #self.log_dict['l_d_real'] = l_d_real.item()
-        #self.log_dict['l_d_fake'] = l_d_fake.item()
-
-        #  TODO update these four lines for use with wandb
-        print("TODO update these four lines for use with wandb")
-        #self.log_dict['D_real'] = torch.mean(self.prop_real.detach())
-        #self.log_dict['D_fake'] = torch.mean(self.prop_fake.detach())
-
         if self.opt_train['E_decay'] > 0:
             self.update_E(self.opt_train['E_decay'])
 
@@ -567,7 +413,7 @@ class ModelPlain(ModelBase):
             self.patience_counter = 0
         elif validation_loss > (self.min_validation_loss + self.min_delta):
             self.patience_counter += 1
-            if (self.patience_counter >= self.patience) and current_step > 75000:
+            if (self.patience_counter >= self.patience):
                 self.early_stop = True
 
     def record_test_log(self, current_step, idx_test):
@@ -594,14 +440,11 @@ class ModelPlain(ModelBase):
     # ----------------------------------------
     def test(self):
         self.netG.eval()
-        #with torch.no_grad():
         with torch.inference_mode():
             self.netG_forward()
         self.netG.train()
 
     def validation(self):
-
-        #self.netG.eval()
 
         # Forward G
         with torch.inference_mode():
@@ -620,8 +463,6 @@ class ModelPlain(ModelBase):
 
     def validation_amp(self):
 
-        #self.netG.eval()
-
         with torch.cuda.amp.autocast(dtype=self.mixed_precision):
             # Forward G
             self.netG_forward()
@@ -635,72 +476,6 @@ class ModelPlain(ModelBase):
         # Compute performance metrics
         rescale_images = True if self.opt['datasets']['norm_type'] == "znormalization" else False
         compute_performance_metrics(self.E, self.H, self.metric_fn_dict, self.metric_val_dict, rescale_images)
-
-
-
-        # self.netG.eval()
-        #
-        # with torch.inference_mode():
-        #
-        #     # Forward G on fake image E with/without AMP
-        #     self.netG_forward()
-        #
-        #     # Compute generator validation loss with/without AMP
-        #     if self.mixed_precision is not None:
-        #         with torch.cuda.amp.autocast(dtype=self.mixed_precision):
-        #             self.gen_loss = compute_generator_loss(self.H, self.E, self.loss_fn_dict, self.loss_val_dict, None, self.device)
-        #     else:
-        #         self.gen_loss = compute_generator_loss(self.H, self.E, self.loss_fn_dict, self.loss_val_dict, None, self.device)
-        #
-        #     # Add generator validation loss to total loss
-        #     self.G_valid_loss += self.gen_loss
-        #
-        #     # Compute performance metrics:
-        #     #self.E_img = utils_image.tensor2ufloat(self.E) # returns floats clamped between 0 and 1
-        #     #self.H_img = utils_image.tensor2ufloat(self.H) # returns floats clamped between 0 and 1
-        #     compute_performance_metrics(self.E, self.H, self.metric_fn_dict, self.metric_val_dict)
-        #     #for key, value in self.metric_func_dict.items():
-        #     #    self.metric_val_dict[key] += self.metric_func_dict[key](self.E_img, self.H_img, border=config.OPT['scale'])
-        #
-        #         #self.psnr += util.calculate_psnr(self.E_img, self.H_img, border=border)
-        #         #self.nrmse += util.calculate_nrmse(self.H_img, self.E_img, border=border)
-        #         #self.ssim += util.calculate_ssim_3d(self.H_img, self.E_img, border=border)
-        #
-        #     #save_img_path = os.path.join(img_dir, '{:s}_{:d}.nii.gz'.format(img_name, current_step))
-        #     #output_nib = nib.Nifti1Image(E_img, np.eye(4))
-
-
-
-
-    def full_reconstruction(self):
-        pass
-        # # Code for full sample reconstruction from SuperFormer
-        # HR = self.H
-        # #HR = test_data["H"]
-        # H, W, D = HR.shape[2:]
-        # patches = (HR.shape[2] // opt["datasets"]["test"]["train_size"]) * (
-        #             HR.shape[3] // opt["datasets"]["test"]["train_size"]) * (
-        #                       HR.shape[4] // opt["datasets"]["test"]["train_size"])
-        # model.netG.eval()
-        # output = torch.zeros_like(test_data['H'])
-        # i = 0
-        # for h in range(H // train_size):
-        #     for w in range(W // train_size):
-        #         for d in range(D // train_size):
-        #             patch_L = test_data['L'][:, :, h * train_size:h * train_size + train_size,
-        #                       w * train_size:w * train_size + train_size,
-        #                       d * train_size:d * train_size + train_size]
-        #             model.feed_data({'L': patch_L}, need_H=False)
-        #             model.test()
-        #             output[:, :, h * train_size:h * train_size + train_size,
-        #             w * train_size:w * train_size + train_size,
-        #             d * train_size:d * train_size + train_size] = model.E
-        #             print(i)
-        #             i += 1
-        #
-        # self.E_img = util.tensor2uint(output)
-        # self.H_img = util.tensor2uint(HR)
-
 
     # ----------------------------------------
     # get log_dict
@@ -732,10 +507,6 @@ class ModelPlain(ModelBase):
             plt.xticks([])
             plt.yticks([])
             plt.show()
-            #plt.figure()
-            #plt.imshow(grid_image, vmin=0, vmax=255)
-            #plt.title(figure_string)
-            #plt.show()
 
         wandb.log({"Comparisons training": wandb.Image(grid_image, caption=figure_string, mode="RGB")})  # WandB assumes channel last
 

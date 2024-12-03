@@ -8,9 +8,9 @@
   "wandb_mode": "online",
   "wandb_entity": "aulho",
   "wandb_project": "Benchmark_V2.0_4x_Synthetic_2022_QIM_52_Bone", // "Xtreme-CT_2x_SR_IXI"
-  "experiment_id": "SuperFormer_ps32_4x_ID000244_L1_100K",
+  "experiment_id": "SuperFormer_ps32_4x_ID006503_L1_100K",
   "run_name": "SuperFormer_Synthetic_2022_QIM_52_Bone_ps32_4x",
-  "note": "Dataset: Synthetic_2022_QIM_52_Bone w. DivisiblePad k=2, Model: SuperFormer, patch size: 32. Batch size 4, pixelshuffle3D, accumulation steps: 1, iterations: 100K, Losses: L1, learning rate: 2e-4",
+  "note": "Dataset: Synthetic_2022_QIM_52_Bone w. DivisiblePad k=4, Model: SuperFormer, patch size: 32. Batch size 5, pixelshuffle3D, accumulation steps: 1, iterations: 100K, Losses: L1, learning rate: 2e-4",
 
   "is_train": true,
 
@@ -30,18 +30,20 @@
 
   "datasets": {
       "name": "Synthetic_2022_QIM_52_Bone",  // "TEST_DATASET" "Synthetic_2022_QIM_52_Bone" "2022_QIM_52_Bone" "IXI" "HCP_1200" "KIRBY21" "BRATS2023" "2022_QIM_52_Bone_Block",
-      "dataset_type": "MonaiSmartCacheDataset",   // "MonaiDataset" "MonaiSmartCacheDataset" "MonaiIterableDataset" "MonaiCacheDataset"
+      "dataset_type": "CacheDataset",   // "MonaiDataset" "MonaiSmartCacheDataset" "MonaiIterableDataset" "MonaiCacheDataset"
+
+      "enable_femur_padding": false,
 
       "n_channels": 1,  // number of input channels of data samples
       "patch_size": 32,  // Low-resolution patch size. High-resolution has size LR*UP_FACTOR
-      "channel_dim": "no_channel", // "no_channel", 0, 1, 2, 3. For instance: TEST_DATASET: -1, HCP_1200: "no_channel"
+      "channel_dim": "no_channel", // "no_channel", 0, 1, 2, 3. For instance: TEST_DATASET: -1, HCP_1200: "no_channel", IXI: "no_channel", BRATS2023: "no_channel"
 
       "norm_type": "scale_intensity", // "scale_intensity" "znormalization"
       "crop_type": "random_label", // "random_spatial" "random_label" "crop_pos_neg_label"
 
       "degradation_type": "resize",  // "kspace_trunc" "resize"
       "downsampling_method": "linear",  // used when degradation type is "resize"
-      "blur_method": "3d_gaussian_blur",  // method for blurring, either "monai_gaussian_blur" or "3d_gaussian_blur"
+      "blur_method": "monai_gaussian_blur",  // method for blurring, either "monai_gaussian_blur" or "3d_gaussian_blur"
       "blur_sigma": 1.0,  // std of gaussian kernel used for blurring before downsampling
 
       "factor_truncate": 4.0,  // Used when degradation type is "kspace_trunc"
@@ -54,14 +56,14 @@
         "patches_per_batch": 1,  // number of patches to sample for each batch
         "replace_rate": 0.10,
         "cache_num": 2000,
-        "init_workers": 5,
-        "replace_workers": 5
+        "init_workers": 2,
+        "replace_workers": 2
       },
 
       "dataloader_params": {  // Used for MonaiDataset
         "dataloader_shuffle": false,
-        "dataloader_batch_size": 4, // Defines how many input images to sample patches from: usually 1. Superformer uses 4
-        "num_load_workers": 4,
+        "dataloader_batch_size": 5, // Defines how many input images to sample patches from: usually 1. Superformer uses 4
+        "num_load_workers": 0,
         "persist_workers": false,
         "pin_memory": false
       },
@@ -74,14 +76,14 @@
         "patches_per_batch": 1,  // number of patches to sample for each batch
         "replace_rate": 0.10,
         "cache_num": 2000,
-        "init_workers": 5,
-        "replace_workers": 5
+        "init_workers": 2,
+        "replace_workers": 2
       },
 
       "dataloader_params": {  // Used for MonaiDataset
         "dataloader_shuffle": false,
-        "dataloader_batch_size": 4, // Defines how many input images to sample patches from: usually 1
-        "num_load_workers": 4,
+        "dataloader_batch_size": 5, // Defines how many input images to sample patches from: usually 1
+        "num_load_workers": 0,
         "persist_workers": false,
         "pin_memory": false
       },
@@ -108,7 +110,7 @@
     "num_feat": 126,           // Default is 126
     "patch_size": 2,  // 2
 
-    "use_checkpoint": true,    // Testing pre-implemented gradient checkpointing of SuperFormer, August
+    "use_checkpoint": false,    // Testing pre-implemented gradient checkpointing of SuperFormer, August
 
     "init_type": "default",
     "init_bn_type": null,      // "uniform" | "constant"
@@ -118,10 +120,13 @@
   "train": {
 
     "iterations": 100000,
+    "validation_iterations": 500,   // number of iterations in each validation loop
     "epochs": 0,  // Maximum number of epochs
     "mixed_precision": null, // BF16", // "BF16",
 
     "num_accum_steps_G": 1,   // number of gradient accumulation steps on G
+
+    "early_stop_patience": 100,  // validation loops to wait until validation loss decreases.
 
     "G_loss_weights": {
       "MSE": 0,

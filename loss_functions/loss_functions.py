@@ -2,7 +2,6 @@ import torch
 import torch.nn.functional as F
 import torch.cuda.amp
 
-
 def compute_discriminator_loss(prop_real, prop_fake):
     dis_loss_fake = F.binary_cross_entropy_with_logits(prop_fake, torch.zeros_like(prop_fake))
     dis_loss_real = F.binary_cross_entropy_with_logits(prop_real, torch.ones_like(prop_real) - 0.1 * torch.ones_like(prop_real))

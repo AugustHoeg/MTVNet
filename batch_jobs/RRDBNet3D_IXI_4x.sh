@@ -56,7 +56,7 @@ source "${VENV_DIR}/${VENV_NAME}/bin/activate"
 
 echo "About to run scripts"
 
-#python -u train.py --options_file train_RRDBNet3D_IXI_4x.json --cluster "DTU_HPC"
+#python -u train.py --options_file train_RRDBNet3D.json --cluster "DTU_HPC"
 
 python -u test_simpleV3.py --options_file train_RRDBNet3D_IXI_4x.json --cluster "DTU_HPC"
 

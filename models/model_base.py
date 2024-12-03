@@ -4,14 +4,10 @@ import torch.nn as nn
 from utils.utils_bnorm import merge_bn, tidy_sequential
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
-# This is an older version of model_base form SuperFormer, but another version can be found here:
-# https://github.com/cszn/KAIR/blob/master/models/model_base.py#L129
-
 class ModelBase():
 
     def __init__(self, opt):
         self.opt = opt                         # opt
-        #self.save_dir = opt['path']['models']  # save models ## Not needed due to WandB handling saving of model
         self.device = torch.device('cuda' if opt['gpu_ids'] is not None else 'cpu')
         self.is_train = opt['is_train']        # training or not
         self.schedulers = []                   # schedulers
