@@ -6,63 +6,58 @@
 
   // WandB parameters
   "wandb_mode": "offline",
-  "wandb_entity": "aulho",
-  "wandb_project": "Benchmark_V2.0_3x_Synthetic_2022_QIM_52_Bone", // "Xtreme-CT_2x_SR_IXI"
-  "experiment_id": "RRDBNet3D_ps32_3x_ID005575_L1_100K",
-  "run_name": "NR_SEED8339_RRDBNet3D_Synthetic_2022_QIM_52_Bone_ps32_3x",
-  "note": "Dataset: Synthetic_2022_QIM_52_Bone w. DivisiblePad k=4, Model: RRDBNet3D, patch size: 32. Batch size 5, pixelshuffle3D, accumulation steps: 1, iterations: 100K, Losses: L1, learning rate: 1e-4",
+  "wandb_entity": "your_wandb_entity",
+  "wandb_project": "FACTS_Synth",
+  "experiment_id": "RRDBNet3D_ID000000",
+  "run_name": "RRDBNet3D_000",
+  "note": "Note",
 
   "is_train": true,
 
   "gpu_ids": [0],
   "dist": false,
-  "up_factor": 3,  // upscaling factor
+  "up_factor": 4,  // upscaling factor
 
-  "save_model": true,  // flag to save model
+  "save_model": true,  // flag to save model after training
   "save_time": 36,  // Backup save of model after 35 hours
 
   "path": {
     "root": "superresolution",
-    "pretrained_netG_experiment_id": null, // "AugustNet_ps48_2x_ID000214"
+    "pretrained_netG_experiment_id": null,
     "pretrained_netE": null,
     "pretrained_optimizerG_experiment_id": null
   },
 
   "datasets": {
-      "name": "Synthetic_2022_QIM_52_Bone",  // "TEST_DATASET" "Synthetic_2022_QIM_52_Bone" "2022_QIM_52_Bone" "IXI" "HCP_1200" "KIRBY21" "BRATS2023" "2022_QIM_52_Bone_Block",
-      "dataset_type": "CacheDataset",   // "MonaiDataset" "MonaiSmartCacheDataset" "MonaiIterableDataset" "MonaiCacheDataset"
+      "name": "Synthetic_2022_QIM_52_Bone",  // "Synthetic_2022_QIM_52_Bone" "2022_QIM_52_Bone" "IXI" "HCP_1200" "KIRBY21" "BRATS2023"
+      "dataset_type": "CacheDataset",   // "MonaiSmartCacheDataset" "CacheDataset"
 
       "enable_femur_padding": false,
 
       "n_channels": 1,  // number of input channels of data samples
       "patch_size": 32,  // Low-resolution patch size. High-resolution has size LR*UP_FACTOR
-      "channel_dim": "no_channel", // "no_channel", 0, 1, 2, 3. For instance: TEST_DATASET: -1, HCP_1200: "no_channel", IXI: "no_channel", BRATS2023: "no_channel"
+      "channel_dim": "no_channel", // "no_channel", 0, 1, 2, 3.
 
       "norm_type": "scale_intensity", // "scale_intensity" "znormalization"
-      "crop_type": "random_label", // "random_spatial" "random_label" "crop_pos_neg_label"
+      "crop_type": "random_label", // "random_spatial" "random_label"
 
-      "degradation_type": "resize",  // "kspace_trunc" "resize"
-      "downsampling_method": "linear",  // used when degradation type is "resize"
+      "degradation_type": "resize",  //
+      "downsampling_method": "linear",  //
       "blur_method": "monai_gaussian_blur",  // method for blurring, either "monai_gaussian_blur" or "3d_gaussian_blur"
       "blur_sigma": 1.0,  // std of gaussian kernel used for blurring before downsampling
 
-      "factor_truncate": 4.0,  // Used when degradation type is "kspace_trunc"
-      "norm_val": null,  // should usually be null, which means kspace truncation will divide by the max of each patch (unless max is very small)
-      "slice_dim": 1,  // Should be changed if the dataset changes, HCP has slice_dim = 1, IXI has slice_dim = 3.
-      "kspace_trunc_keep_shape": false,
-
     "train": {
-      "dataset_params": {  // Used for MonaiSmartCacheDataset
-        "patches_per_batch": 1,  // number of patches to sample for each batch
+      "dataset_params": {
+        "patches_per_batch": 1,
         "replace_rate": 0.10,
         "cache_num": 2000,
         "init_workers": 2,
         "replace_workers": 2
       },
 
-      "dataloader_params": {  // Used for MonaiDataset
+      "dataloader_params": {
         "dataloader_shuffle": false,
-        "dataloader_batch_size": 5, // Defines how many input images to sample patches from: usually 1. Superformer uses 4
+        "dataloader_batch_size": 5,
         "num_load_workers": 2,
         "persist_workers": true,
         "pin_memory": false
@@ -72,17 +67,17 @@
     },
 
     "test": {
-      "dataset_params": {  // Used for MonaiSmartCacheDataset
-        "patches_per_batch": 1,  // number of patches to sample for each batch
+      "dataset_params": {
+        "patches_per_batch": 1,
         "replace_rate": 0.10,
         "cache_num": 2000,
         "init_workers": 2,
         "replace_workers": 2
       },
 
-      "dataloader_params": {  // Used for MonaiDataset
+      "dataloader_params": {
         "dataloader_shuffle": false,
-        "dataloader_batch_size": 5, // Defines how many input images to sample patches from: usually 1
+        "dataloader_batch_size": 5,
         "num_load_workers": 0,
         "persist_workers": false,
         "pin_memory": false
@@ -108,9 +103,9 @@
   "train": {
 
     "iterations": 100000,
-    "validation_iterations": 500,   // number of iterations in each validation loop
-    "epochs": 0,  // Maximum number of epochs
-    "mixed_precision": null, // BF16", // "BF16",
+    "validation_iterations": 500,
+    "epochs": 0,
+    "mixed_precision": null,
 
     "num_accum_steps_G": 1,   // number of gradient accumulation steps on G
 
@@ -118,23 +113,15 @@
 
     "G_loss_weights": {
       "MSE": 0,
-      "L1": 1.0, // 0.1
+      "L1": 1.0,
       "BCE_Logistic": 0,
-      "BCE": 0,
-      "VGG": 0,
-      "VGG3D": 0,  // 0.006 0.003
-      "GRAD": 0,
-      "LAPLACE": 0,
-      "TV3D": 0,  // 0.1
-      "TEXTURE3D": 0,  // 0.5
-      "ADV": 0,  // 10**-3,  // is 0.1 in mDCSRN-GAN paper, but uses WGAN-GP instead of vanilla GAN
-      "STRUCTURE_TENSOR": 0  // 10**-7
+      "BCE": 0
     },
 
     "E_decay": 0,
 
     "G_optimizer_type": "adam",
-    "G_optimizer_lr": 1e-4, // 2e-4, 5e-5
+    "G_optimizer_lr": 1e-4,
     "G_optimizer_wd": 0,
 
     "G_optimizer_clipgrad": 15,
@@ -145,7 +132,7 @@
       70000,   
       85000,
       95000   
-    ], // 50000 70000 85000 95000 for 100K iterations 
+    ],
 
     "G_scheduler_gamma": 0.5,
     "G_regularizer_orthstep": null,
@@ -154,14 +141,14 @@
     "G_param_strict": true,
     "E_param_strict": true,
 
-    "manual_seed": 8339,
+    "manual_seed": 8338,
     "checkpoint_test": 5000,
     "checkpoint_save": 1000000,
     "checkpoint_print": 5000,
     "checkpoint_save_visuals": 5000
   },
   "test": {
-    "performance_metrics": ["psnr", "ssim", "nrmse"], // ["psnr", "ssim", "nrmse"],
-    "upscaling_methods": ["tio_nearest", "tio_bspline"] // "tio_linear"
+    "performance_metrics": ["psnr", "ssim", "nrmse"],
+    "upscaling_methods": ["tio_nearest", "tio_bspline"]
   }
 }

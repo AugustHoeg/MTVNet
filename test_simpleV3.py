@@ -172,7 +172,7 @@ if __name__ == "__main__":
         elif config.MODEL_ARCHITECTURE == "ArSSR":
             opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_ArSSR.json')
         elif config.MODEL_ARCHITECTURE == "MTVNet":
-            opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_MTVNet.json')
+            opt_path = os.path.join(config.ROOT_DIR, 'options', 'train_MTVNet_tmp.json')
         else:
             raise NotImplementedError('Model architecture %s not implemented.' % config.MODEL_ARCHITECTURE)
 

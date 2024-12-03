@@ -2,14 +2,14 @@
 {
   "task": "superresolution",
   "model": "plain",
-  "model_architecture": "mDCSRN",
+  "model_architecture": "MTVNet",
 
   // WandB parameters
   "wandb_mode": "offline",
   "wandb_entity": "your_wandb_entity",
-  "wandb_project": "FACTS_Synth",
-  "experiment_id": "mDCSRN_ID000000",
-  "run_name": "mDCSRN_000",
+  "wandb_project": "HCP_1200", // <--- change project
+  "experiment_id": "MTVNet_ID000000",
+  "run_name": "MTVNet_000",
   "note": "Note",
 
   "is_train": true,
@@ -18,32 +18,32 @@
   "dist": false,
   "up_factor": 4,  // upscaling factor
 
-  "save_model": true,  // flag to save model after training
+  "save_model": true,  // flag to save model
   "save_time": 36,  // Backup save of model after 35 hours
 
   "path": {
     "root": "superresolution",
-    "pretrained_netG_experiment_id": null,
+    "pretrained_netG_experiment_id": null, // "AugustNet_ps48_2x_ID000214"
     "pretrained_netE": null,
     "pretrained_optimizerG_experiment_id": null
   },
 
   "datasets": {
-      "name": "Synthetic_2022_QIM_52_Bone",  // "Synthetic_2022_QIM_52_Bone" "2022_QIM_52_Bone" "IXI" "HCP_1200" "KIRBY21" "BRATS2023"
+      "name": "HCP_1200",  // "Synthetic_2022_QIM_52_Bone" "2022_QIM_52_Bone" "IXI" "HCP_1200" "KIRBY21" "BRATS2023"
       "dataset_type": "CacheDataset",   // "MonaiSmartCacheDataset" "CacheDataset"
 
-      "enable_femur_padding": false,
+      "enable_femur_padding": true,
 
       "n_channels": 1,  // number of input channels of data samples
-      "patch_size": 32,  // Low-resolution patch size. High-resolution has size LR*UP_FACTOR
+      "patch_size": 64,  // Low-resolution patch size. High-resolution has size LR*UP_FACTOR
       "channel_dim": "no_channel", // "no_channel", 0, 1, 2, 3.
 
       "norm_type": "scale_intensity", // "scale_intensity" "znormalization"
-      "crop_type": "random_label", // "random_spatial" "random_label"
+      "crop_type": "random_spatial", // "random_spatial" "random_label" "crop_pos_neg_label"
 
       "degradation_type": "resize",  //
       "downsampling_method": "linear",  //
-      "blur_method": "monai_gaussian_blur",  // method for blurring, either "monai_gaussian_blur" or "3d_gaussian_blur"
+      "blur_method": "3d_gaussian_blur",  // method for blurring, either "monai_gaussian_blur" or "3d_gaussian_blur"
       "blur_sigma": 1.0,  // std of gaussian kernel used for blurring before downsampling
 
     "train": {
@@ -57,7 +57,7 @@
 
       "dataloader_params": {
         "dataloader_shuffle": false,
-        "dataloader_batch_size": 5,
+        "dataloader_batch_size": 4,
         "num_load_workers": 2,
         "persist_workers": true,
         "pin_memory": false
@@ -77,7 +77,7 @@
 
       "dataloader_params": {
         "dataloader_shuffle": false,
-        "dataloader_batch_size": 5,
+        "dataloader_batch_size": 4,
         "num_load_workers": 0,
         "persist_workers": false,
         "pin_memory": false
@@ -87,19 +87,39 @@
     }
   },
   "netG": {
-    "net_type": "mDCSRN",
-    "description": "Multi-Level Densely Connected Network from paper: MRI Super-Resolution with GAN and 3D Multi-Level DenseNet: Smaller, Faster, and Better",
-    "in_channels": 1,
-    "k_factor": 12,
-    "k_size": 3,
-    "num_dense_blocks": 8,
-    "num_dense_units": 4,
-    "upsample_method": "pixelshuffle3D", // "deconv_nn_resize" "pixelshuffle3D" "Monaipixelshuffle" "nearest"
-    "use_checkpoint": false,
+    "net_type": "MTVNet",
+    "description": "Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions",
 
-    "init_type": "default",
+    "in_channels": 1,
+    "shallow_feats": 128,
+    "pre_up_feats": [64, 64],
+    "num_levels": 2,
+    "level_ratio": 2,
+    "num_blks": [2, 3],
+    "blk_layers": [6, 6],
+    "ct_embed_dims": [128, 128],
+    "embed_dims": [128, 128],
+    "ct_size": 4,
+    "ct_pool_method": "conv",
+    "patch_sizes": [4, 2],
+    "num_heads": 4,
+    "attn_window_sizes": [8, 8],
+    "drop_path": 0.1,
+    "upsample_method": "pixelshuffle3D",
+    "token_upsample_method": "deconv_nn_resize",
+    "use_checkpoint": true,
+    "enable_ape_ct": true,
+    "enable_ape_x": false,
+    "enable_ct_rpb": true,
+    "enable_conv_skip": false,
+    "enable_long_skip": true,
+    "enable_shift": true,
+    "patch_pe_method": "window_relative",
+    "layer_type": "fastervit",
+
+    "init_type": "kaiming_normal",
     "init_bn_type": "uniform",      // "uniform" | "constant"
-    "init_gain": 0.2
+    "init_gain": 0.1
   },
 
   "train": {
@@ -123,10 +143,10 @@
     "E_decay": 0,
 
     "G_optimizer_type": "adam",
-    "G_optimizer_lr": 1e-4,
+    "G_optimizer_lr": 2e-4,
     "G_optimizer_wd": 0,
 
-    "G_optimizer_clipgrad": 15,
+    "G_optimizer_clipgrad": 1,
     "G_optimizer_reuse": true,
     "G_scheduler_type": "MultiStepLR",
     "G_scheduler_milestones": [

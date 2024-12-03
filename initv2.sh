@@ -1,9 +1,9 @@
 #!/bin/bash
-# Simple init script for Python on HPC
-# August Hoeg, aulho@dtu.dk, 2024
+# Simple init script for Python on LSF HPC platform
+# Written by Patrick M. Jensen, patmjen@dtu.dk
+# Modified by August Hoeg, aulho@dtu.dk, 2024
 
 # Configuration
-# This is what you should change for your setup
 VENV_NAME=venv         # Name of your virtualenv (default: venv)
 VENV_DIR=.             # Where to store your virtualenv (default: current directory)
 PYTHON_VERSION=3.11.9  # Python version (default: 3.9.19)
