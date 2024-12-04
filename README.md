@@ -2,7 +2,7 @@
 # MTVNet 
 
 ### MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions [[Paper Link]](https://arxiv.org)
-August Leander Høeg (https://github.com/AugustHoeg), Sophia W. Bardenfleth, Hans Martin Kjer, Tim B. Dyrby, Vedrana Andersen Dahl and Anders Dahl
+[August Leander Høeg](https://github.com/AugustHoeg), Sophia W. Bardenfleth, Hans Martin Kjer, Tim B. Dyrby, Vedrana Andersen Dahl and Anders Dahl
 
 ## Updates
 - ✅ 2022-05-09: Release the first version of the paper at Arxiv.
