@@ -5,7 +5,7 @@ import subprocess
 import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
-
+import pickle
 
 # ----------------------------------
 # init
@@ -198,4 +198,3 @@ def reduce_loss_dict(loss_dict):
         reduced_losses = {k: v for k, v in zip(keys, losses)}
 
     return reduced_losses
-

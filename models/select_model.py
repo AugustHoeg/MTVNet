@@ -13,12 +13,6 @@ def define_Model(opt):
     if model == 'plain':
         from models.model_plain import ModelPlain as M
 
-    elif model == 'gan' or model == 'ragan':     # one input: L
-        from models.model_gan import ModelGAN as M
-
-    elif model == 'wgan-gp':     # one input: L
-        from models.model_wgan_gp import ModelWGAN_GP as M
-
     elif model == "implicit":
         from models.model_implicit import ModelImplicit as M
 
