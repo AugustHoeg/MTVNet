@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 ## Training / Testing
 
-- Please refer to the configuration files for each model located in ```/options```. These contain infomation regarding the model architecture to be trained/tested, the dataset and the SR scale.
+- Please refer to the configuration files for each model located in ```/options```. These contain information regarding the model architecture to be trained/tested, the dataset and the SR scale.
 - We provide separate configurations files for the structural MRI datasets, and the FACTS-Synth/Real datasets. The dataset can be selected by setting the parameter ```dataset_name``` in the appropriate configuration file.
 - Note that the training procedure by default logs training statistics using [Weights and Biases](https://wandb.ai/).
 
