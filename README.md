@@ -9,16 +9,11 @@
 - ✅ 2024-12-02: Release the code, models and results of MTVNet.
 - **(To do)** Add dataset guide 
 
-## Overview
+## Overview of MTVNet
 <img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/overview_MTVNet.png" width="800"/>
 
 ### Network architecture
 <img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/network_architecture.png" width="800"/>
-
-### Results
-<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/Results_table.png" width="800"/>
-
-
 
 ## Environment
 
@@ -50,6 +45,9 @@ python -u test.py --options_file train_MTVNet.json
 ```
 - Performance statistics will also be saved in  ```/logs``` in the same location as the trained model parameters.
 
+## Results
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/Results_table.png" width="800"/>
+
 ## LAM 3D
 1. Navigate to ```/LAM_3d```
 2. Run the analysis
@@ -60,6 +58,7 @@ python -u test.py --options_file train_MTVNet.json
 > Only FACTS-Synth at scale $\times 4$ is currently supported.
 
 <img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/LAM_FACTS_Synth_4x_cube_005.png" width="800"/>
+
 
 ## Contributions
 Contributions are welcome, just create an [issue](https://github.com/AugustHoeg/MTVNet/issues) or a [PR](https://github.com/AugustHoeg/MTVNet/pulls).
