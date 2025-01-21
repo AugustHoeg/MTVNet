@@ -17,4 +17,4 @@ logs/HCP_1200/wandb/*
 logs/IXI/wandb/*
 logs/KIRBY21/wandb/*
 
-/LAM_3d/saved_image_cubes/
+LAM_3d/saved_image_cubes/
