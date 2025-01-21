@@ -5,9 +5,16 @@
 __pycache__/
 
 saved_models/
+saved_image_cubes/
 
 **/*.h5
 *.h5
 
-wandb/
+logs/2022_QIM_52_Bone/wandb/*
+logs/Synthetic_2022_QIM_52_Bone/wandb/*
+logs/BRATS2023/wandb/*
+logs/HCP_1200/wandb/*
+logs/IXI/wandb/*
+logs/KIRBY21/wandb/*
 
+/LAM_3d/saved_image_cubes/
