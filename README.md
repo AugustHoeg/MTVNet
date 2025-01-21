@@ -10,6 +10,7 @@
 - **(To do)** Add dataset guide 
 
 ## Overview
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/overview_MTVNet.png" width="800"/>
 
 ### Network architecture
 <img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/network_architecture.png" width="800"/>
@@ -56,7 +57,9 @@ python -u test.py --options_file train_MTVNet.json
    cd LAM_3d
    ./run_LAM_tests.sh
 ```
-> Only FACTS-Synth at scale $\times 4$ is currently supported. 
+> Only FACTS-Synth at scale $\times 4$ is currently supported.
+
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/LAM_FACTS_Synth_4x_cube_005.png" width="800"/>
 
 ## Contributions
 Contributions are welcome, just create an [issue](https://github.com/AugustHoeg/MTVNet/issues) or a [PR](https://github.com/AugustHoeg/MTVNet/pulls).
