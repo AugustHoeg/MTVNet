@@ -1,22 +1,30 @@
 
 # MTVNet 
 
-### MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions [[Paper Link]](https://arxiv.org)
+### MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions [[Paper Link]](https://arxiv.org/abs/2412.03379)
 [August Leander Høeg](https://github.com/AugustHoeg), Sophia W. Bardenfleth, Hans Martin Kjer, Tim B. Dyrby, Vedrana Andersen Dahl and Anders Dahl
 
 ## Updates
-- ✅ 2022-05-09: Release the first version of the paper at Arxiv.
-- ✅ 2022-05-20: Release the codes, models and results of MTVNet.
-- **(To do)** Add ...
+- ✅ 2024-12-04: Release of first version of the paper on Arxiv.
+- ✅ 2024-12-02: Release the code, models and results of MTVNet.
+- **(To do)** Add dataset guide 
 
 ## Overview
 
+### Network architecture
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/figures/Network_architecture.png" width="600"/>
+
+### Results
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/figures/Results_table.png" width="600"/>
+
+
+
 ## Environment
-- [PyTorch >= 2.5.1](https://pytorch.org/)
-- [Monai >= ]
+
 ### Installation
 1. Clone the repository.
-2. Install requirements
+2. Create virtual environment.
+3. Install requirements
 ```sh
 pip install -r requirements.txt
 ```
@@ -48,7 +56,7 @@ python -u test.py --options_file train_MTVNet.json
    cd LAM_3d
    ./run_LAM_tests.sh
 ```
-> Only FACTS-Synth at scale $\times 4$ is supported. 
+> Only FACTS-Synth at scale $\times 4$ is currently supported. 
 
 ## Contributions
 Contributions are welcome, just create an [issue](https://github.com/AugustHoeg/MTVNet/issues) or a [PR](https://github.com/AugustHoeg/MTVNet/pulls).
@@ -57,16 +65,16 @@ Contributions are welcome, just create an [issue](https://github.com/AugustHoeg/
 If you use this any of this for academic work, please consider citing our work.
 
 > Høeg, August Leander, et al. MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions, 
-[ [paper](https://doi.org/) ]
+[ [paper](https://doi.org/10.48550/arXiv.2412.03379) ]
 
 ``` bibtex
-@article{Hoeg2024MTVNet,
-  author = {Høeg, August Leander and Bardenfleth, Sophia W. and Kjær, Hans Martin and Dyrby, Tim B. and Dahl, Vedrana and Dahl, Anders Bjorholm},
-  title = {MTVNet: Mapping using Transformers for Volumes – Network for Super-Resolution with Long-Range Interactions},
-  language = {eng},
-  format = {article},
-  year = {2024},
-  doi = {}
+@misc{Hoeg2024MTVNet,
+    title={MTVNet: Mapping using Transformers for Volumes -- Network for Super-Resolution with Long-Range Interactions},
+    author={August Leander Høeg and Sophia W. Bardenfleth and Hans Martin Kjer and Tim B. Dyrby and Vedrana Andersen Dahl and Anders Dahl},
+    year={2024},
+    eprint={2412.03379},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
 }
 ```
 
