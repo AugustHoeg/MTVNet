@@ -12,10 +12,10 @@
 ## Overview
 
 ### Network architecture
-<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/network_architecture.png" width="600"/>
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/network_architecture.png" width="800"/>
 
 ### Results
-<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/Results_table.png" width="600"/>
+<img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/Results_table.png" width="800"/>
 
 
 
