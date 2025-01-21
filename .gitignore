@@ -9,10 +9,5 @@ saved_models/
 **/*.h5
 *.h5
 
-logs/2022_QIM_52_Bone/wandb
-logs/Synthetic_2022_QIM_52_Bone/wandb
-logs/BRATS2023/wandb
-logs/HCP_1200/wandb
-logs/IXI/wandb
-logs/KIRBY21/wandb
+wandb/
 
