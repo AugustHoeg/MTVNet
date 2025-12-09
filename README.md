@@ -57,7 +57,7 @@ python -u test.py --options_file train_MTVNet.json
    cd LAM_3d
    ./run_LAM_tests.sh
 ```
-> Only FACTS-Synth at scale $\times 4$ is currently supported.
+> Only FACTS-Synth and HCP 1200 at scale $\times 4$ is currently supported.
 
 <img src="https://raw.githubusercontent.com/AugustHoeg/MTVNet/main/figures/LAM_results.png" width="1000"/>
 
